@@ -192,7 +192,8 @@
 
             <add position="before">
                 <![CDATA[
-                    $tracking_numbers = $this->model_shipping_dpdlivehandler->getOrderBarcode($result['order_id']);
+                    $this->load->model('shipping/dpdlivehandler');
+                    $tracking_numbers = $this->model_shipping_dpdlivehandler->getOrderBarcode(isset($order_id) ? $order_id : $result['order_id']);
                     $barcodes = array();
 
                     if (count($tracking_numbers) > 0) {
