@@ -136,7 +136,7 @@
                               <input type="text" name="dpd_setting_warehouse[{{ warehouse_row }}][contact_person_name]" value="{{ dpd_setting_warehouse['contact_person_name'] }}" placeholder="{{ entry_contact_person_name }}" class="form-control" required="true" />
                             </td>
                             <td class="text-left">
-                              <input type="text" name="dpd_setting_warehouse[{{ warehouse_row }}][phone]" value="{{ dpd_setting_warehouse['phone'] }}" placeholder="{{ entry_warehouse_phone }}" class="form-control" required="true" />
+                              <input type="number" name="dpd_setting_warehouse[{{ warehouse_row }}][phone]" value="{{ dpd_setting_warehouse['phone'] }}" placeholder="{{ entry_warehouse_phone }}" class="form-control" required="true" />
                             </td>
                             <td class="text-right">
                               <button type="button" onclick="$('#warehouse-row{{ warehouse_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button>
@@ -327,7 +327,7 @@
                   <div class="form-group">
                     <label class="col-sm-2 control-label" for="pickup_contact">{{ entry_pickup_contact }}</label>
                     <div class="col-sm-10">
-                      <input type="text" name="collectionRequest[pickup_contact]" id="pickup_contact" class="form-control" maxlength="20" />
+                      <input type="number" name="collectionRequest[pickup_contact]" id="pickup_contact" class="form-control" maxlength="20" />
                     </div>
                   </div>
 
@@ -384,7 +384,7 @@
                   <div class="form-group">
                     <label class="col-sm-2 control-label" for="recipient_pickup_contact">{{ entry_pickup_contact }}</label>
                     <div class="col-sm-10">
-                      <input type="text" name="collectionRequest[recipient_pickup_contact]" id="recipient_pickup_contact" class="form-control" maxlength="20" />
+                      <input type="number" name="collectionRequest[recipient_pickup_contact]" id="recipient_pickup_contact" class="form-control" maxlength="20" />
                     </div>
                   </div>
 
