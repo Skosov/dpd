@@ -90,7 +90,7 @@ class ModelShippingDpdLivehandler extends Model {
             'pdf' => 'PDF',
         );
 
-        $files = array();    
+        $files = array();
 
         $dir = new DirectoryIterator(DIR_DOWNLOAD);
 
@@ -118,9 +118,7 @@ class ModelShippingDpdLivehandler extends Model {
                     'created' => date('Y-m-d H:i:s', $file->getMTime()),
                     'date' => date('Y-m-d H:i:s', $file->getMTime()),
 
-
-
-                    'preview' => HTTP_CATALOG . str_replace(DIR_STORAGE, 'storage/', DIR_DOWNLOAD) . $file->getFilename()
+                    'preview' => HTTP_CATALOG . 'index.php?route=extension/module/dpdpdf&pdf='.$file->getFilename()
                 );
             }
         }
@@ -128,11 +126,11 @@ class ModelShippingDpdLivehandler extends Model {
         // Delete manifest older than 5 days
         $now = time();
         if ($files) {
-            foreach ($files as $file) {          
+            foreach ($files as $file) {
                 if ((time() - filemtime(DIR_DOWNLOAD . '/' . $file['filename'])) > (5 *86400)) {
                     unlink(DIR_DOWNLOAD . '/' . $file['filename']);
                 }
-            }   
+            }
         }
 
         return $files;
@@ -143,7 +141,7 @@ class ModelShippingDpdLivehandler extends Model {
 
         if ($orderId) {
             $barcode_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "dpd_barcodes WHERE order_id = '" . (int)$orderId . "'");
-            
+
             return $barcode_query->rows;
         }
     }
@@ -170,7 +168,7 @@ class ModelShippingDpdLivehandler extends Model {
         if ($terminal_id) {
 
             $terminal_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "terminals_list WHERE code = '" . $terminal_id . "'");
-            
+
             return $terminal_query->row;
         }
     }
@@ -251,26 +249,29 @@ class ModelShippingDpdLivehandler extends Model {
 
     // Force PDF document download
     private function getLabelsOutput($pdf, $file_name = 'dpdLabels') {
+
+        ob_get_clean();
+
         $today = date('Y-m-d');
         $name = $file_name . '-'.$today. '.pdf';
-        
+
         if (ob_get_contents()) {
             $this->session->data['error_dpd'] = 'Some data has already been output, can\'t send PDF file';
             $this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
         }
-        
+
         header('Content-Description: File Transfer');
-        
+
         if (headers_sent()) {
             $this->session->data['error_dpd'] = 'Some data has already been output to browser, can\'t send PDF file';
             $this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
         }
-        
+
         header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1
         header('Pragma: public');
         header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
         header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
-        header( "refresh:1;url=".(isset($_SERVER['HTTP_REFERER']))?$_SERVER['HTTP_REFERER']:''."" ); 
+        header( "refresh:1;url=".(isset($_SERVER['HTTP_REFERER']))?$_SERVER['HTTP_REFERER']:''."" );
         header('Content-Type: application/force-download');
         header('Content-Type: application/octet-stream', false);
         header('Content-Type: application/download', false);
@@ -278,11 +279,11 @@ class ModelShippingDpdLivehandler extends Model {
         header('Content-Disposition: attachment; filename="'.$name.'";');
         header('Content-Transfer-Encoding: binary');
         header('Content-Length: '.strlen($pdf));
-        
+
         echo $pdf;
 
         return '';
-    }    
+    }
 
     // 4.1 Shipment creation
     public function shipment_creation($orders_id = array()) {
@@ -365,7 +366,7 @@ class ModelShippingDpdLivehandler extends Model {
                 strpos($shipping_code[0], self::COURIERCODESAT) !== FALSE or
                 strpos($shipping_code[0], self::COURIERCODESAME) !== FALSE or
                 strpos($shipping_code[0], self::PARCELCODE) !== FALSE) {
-                
+
                 if (!$this->getOrderBarcode($order_id)) {
                     $product_weight = 0.1;
                     $total_order_quantity = 0;
@@ -377,7 +378,7 @@ class ModelShippingDpdLivehandler extends Model {
                         $total_order_quantity += $product['quantity'];
                         $total_different_products += 1;
                     }
-                    
+
                     // How many labels print
                     $labels_setting = $this->config->get('dpd_setting_parcel_distribution');
 
@@ -385,10 +386,10 @@ class ModelShippingDpdLivehandler extends Model {
                         // All products in same shipment
                         if ($labels_setting == 1) {
                             $num_of_parcel = 1;
-                        // Each product in seperate shipment
+                            // Each product in seperate shipment
                         } else if ($labels_setting == 2) {
                             $num_of_parcel = $total_different_products;
-                        // Each product wuantity in separate shipment
+                            // Each product wuantity in separate shipment
                         } else if ($labels_setting == 3) {
                             $num_of_parcel = $total_order_quantity;
                         } else {
@@ -402,7 +403,7 @@ class ModelShippingDpdLivehandler extends Model {
 
                     // Params which we send
                     $params = array();
-                    
+
                     $params = array(
                         'action' => 'createShipment_',
                         'name1' => $name1,
@@ -429,11 +430,11 @@ class ModelShippingDpdLivehandler extends Model {
                         } else {
                             $params['parcel_type'] = $courier_parcel_type;
                         }
-                        
+
                         // If order is COD
                         if ($order_data['payment_code'] == 'cod') {
                             $params['cod_amount'] = number_format($order_data['total'], 2, '.', '');
-                            
+
                             if ($shipping_return == 1) {
                                 $params['parcel_type'] = $courier_cod_parcel_rod_type;
                             } else {
@@ -464,11 +465,11 @@ class ModelShippingDpdLivehandler extends Model {
                         } else {
                             $params['parcel_type'] = $courier_sat_parcel_type;
                         }
-                        
+
                         // If order is COD
                         if ($order_data['payment_code'] == 'cod') {
                             $params['cod_amount'] = number_format($order_data['total'], 2, '.', '');
-                            
+
                             if ($shipping_return == 1) {
                                 $params['parcel_type'] = $courier_cod_sat_parcel_rod_type;
                             } else {
@@ -486,11 +487,11 @@ class ModelShippingDpdLivehandler extends Model {
                         $params['remark'] = $order_comment;
 
                         $params['parcel_type'] = $courier_same_parcel_type;
-                        
+
                         // If order is COD
                         if ($order_data['payment_code'] == 'cod') {
                             $params['cod_amount'] = number_format($order_data['total'], 2, '.', '');
-                            
+
                             $params['parcel_type'] = $courier_same_cod_parcel_type;
                         }
                     }
@@ -503,7 +504,7 @@ class ModelShippingDpdLivehandler extends Model {
                         // If order is COD
                         if ($order_data['payment_code'] == 'cod') {
                             $params['cod_amount'] = number_format($order_data['total'], 2, '.', '');
-                            
+
                             $params['parcel_type'] = $pickup_cod_parcel_type;
                         }
 
@@ -516,7 +517,7 @@ class ModelShippingDpdLivehandler extends Model {
                         if ($requestResults && isset($requestResults['status']) && $requestResults['status'] == "ok") {
                             $tracking_barcodes[$order_id]['status'] = 'ok';
                             $tracking_barcodes[$order_id]['barcodes'] = $requestResults['pl_number'];
-                            
+
                             if ($requestResults['pl_number']) {
                                 foreach ($requestResults['pl_number'] as $number) {
                                     $this->setOrderBarcode($order_id, $number);
@@ -534,8 +535,8 @@ class ModelShippingDpdLivehandler extends Model {
                         }
                     }
                 } else {
-                        $tracking_barcodes[$order_id]['status'] = 'ok';
-                        $tracking_barcodes[$order_id]['barcodes'] = $this->getOrderBarcode($order_id);
+                    $tracking_barcodes[$order_id]['status'] = 'ok';
+                    $tracking_barcodes[$order_id]['barcodes'] = $this->getOrderBarcode($order_id);
                 }
             } else {
                 $tracking_barcodes[$order_id]['status'] = 'err';
@@ -611,7 +612,7 @@ class ModelShippingDpdLivehandler extends Model {
                     $cod_pudo = ['EE90', 'EE10'];
                     $lenght = 4;
                     break;
-                
+
                 default:
                     $cod_pudo = ['LT900'];
                     $lenght = 5;
@@ -653,7 +654,7 @@ class ModelShippingDpdLivehandler extends Model {
                                 $this->db->query("UPDATE `" . DB_PREFIX . "terminals_list` SET ". strtolower($day['weekday']) ." = '" . $working_hours . "' WHERE code = '" . $this->db->escape($parcel['parcelshop_id']) . "'");
 
                             }
-                        }                       
+                        }
                     }
                 }
             } else {
@@ -665,7 +666,7 @@ class ModelShippingDpdLivehandler extends Model {
         return $result;
     }
 
-    // 4.3 Creating shipment returns    
+    // 4.3 Creating shipment returns
     // 4.4 Creating parcel labels
     public function print_parcel_label($tracking_number = null) {
         $label_size = $this->config->get('dpd_setting_label_size');
@@ -735,7 +736,7 @@ class ModelShippingDpdLivehandler extends Model {
                     return $responseResult['errlog'];
                 }
             }
-            
+
         }
 
         // return $responseResult;
@@ -754,13 +755,13 @@ class ModelShippingDpdLivehandler extends Model {
 
         $orderNo = $this->config->get('dpd_setting_request_order_no');
 
-        if ($orderNo == '') {           
+        if ($orderNo == '') {
             $this->model_setting_setting->editSetting('dpd_setting_request_order_no', array('dpd_setting_request_order_no' => 1));
 
             $orderNo = $this->config->get('dpd_setting_request_order_no');
         } else {
             $this->model_setting_setting->editSetting('dpd_setting_request_order_no', array('dpd_setting_request_order_no' => (int)$orderNo + 1));
-            
+
             $orderNo = '21' . $this->config->get('dpd_setting_request_order_no');
         }
 
@@ -774,7 +775,7 @@ class ModelShippingDpdLivehandler extends Model {
             $senderAddress = $this->custom_length($warehouse_info['address'], 100);
             $senderCity = $this->custom_length($warehouse_info['city'], 100);
             $senderCountry = $this->model_localisation_country->getCountry($warehouse_info['country_id']);
-            $senderPostalCode = preg_replace('/[^0-9,.]/', '', $warehouse_info['postcode']);         
+            $senderPostalCode = preg_replace('/[^0-9,.]/', '', $warehouse_info['postcode']);
             $senderContact = $this->custom_length($warehouse_info['contact_person_name'], 100);
             $palletsCount = $data['palletsCount'];
             $parcelsCount = $data['parcelsCount'];
@@ -788,14 +789,14 @@ class ModelShippingDpdLivehandler extends Model {
 
             $selected = explode (',', $data['selected']);
 
-             // unset($array[1]);
+            // unset($array[1]);
             foreach ($selected as $order_id) {
                 // Get order data
                 $order_data = $this->model_sale_order->getOrder($order_id);
 
                 // Get info of order products
                 $products = $this->model_sale_order->getOrderProducts($order_id);
-                
+
                 // Get order weight
                 foreach ($products as $product) {
                     $product_data = $this->model_catalog_product->getProduct($product['product_id']);
@@ -815,7 +816,7 @@ class ModelShippingDpdLivehandler extends Model {
             $pickup_from = '10:00:00';
 
             $time_cut_off = strtotime('15:00:00');
-            
+
             if ($dayofweek == 6) {
                 // If its saturday
                 $date = date("Y-m-d", strtotime("+ 2 days"));
@@ -834,14 +835,14 @@ class ModelShippingDpdLivehandler extends Model {
                 }
             } else {
                 if (strtotime(date('H:m:s')) >= $time_cut_off or date('H:m:s', strtotime($data['pickup_from'])) >= $time_cut_off) {
-                    $date = date("Y-m-d", strtotime("+ 1 days"));   
+                    $date = date("Y-m-d", strtotime("+ 1 days"));
                 } else {
                     $date = date("Y-m-d");
 
                     $pickup_from = $data['pickup_from'] . ':00';
                     $pickup_until = $data['pickup_until'] . ':00';
                 }
-            }            
+            }
 
             $until = $date . ' ' . $pickup_until;
             $from = $date . ' ' . $pickup_from;
@@ -930,7 +931,7 @@ class ModelShippingDpdLivehandler extends Model {
                     $ccountry = $countries['iso_code_2'];
                 } else {
                     $ccountry = $data['pickup_country'];
-                }        
+                }
 
                 $cphone = $data['pickup_contact'];
                 $cemail = $data['pickup_contact_email'];
@@ -943,7 +944,7 @@ class ModelShippingDpdLivehandler extends Model {
                 $rpostal = $data['recipient_pickup_postcode'];
                 $rcity = $data['recipient_pickup_city'];
 
-                 if (is_numeric($data['recipient_pickup_country'])) {
+                if (is_numeric($data['recipient_pickup_country'])) {
                     $rcountries = $this->model_localisation_country->getCountry($data['recipient_pickup_country']);
                     $rcountry = $rcountries['iso_code_2'];
                 } else {
@@ -960,7 +961,7 @@ class ModelShippingDpdLivehandler extends Model {
                 }
 
                 $info1 = $parcels_no . $pallets_no . $pickup_date . $weight;
-                
+
                 $info2 = $data['pickup_parcels_additional_information'];
 
                 $params = array(
@@ -1051,7 +1052,7 @@ class ModelShippingDpdLivehandler extends Model {
         $results = array();
 
         if ($barcodes) {
-            foreach ($barcodes as $key => $barcode) {               
+            foreach ($barcodes as $key => $barcode) {
                 $params = array(
                     'action' => 'parcelStatus_',
                     'parcel_number' => $barcode['dpd_barcode']
@@ -1075,7 +1076,7 @@ class ModelShippingDpdLivehandler extends Model {
 
     public function reverseCollectionRequest($order_id, $warehouse_id) {
         $this->load->model('shipping/dialcodehelper');
-        
+
         // Get order data
         $this->load->model('sale/order');
 
@@ -1086,7 +1087,7 @@ class ModelShippingDpdLivehandler extends Model {
         // Get info of order products
         $products = $this->model_sale_order->getOrderProducts($order_id);
         $weight_total = 0;
-        
+
         // Get order weight
         foreach ($products as $product) {
             $product_data = $this->model_catalog_product->getProduct($product['product_id']);
@@ -1111,10 +1112,10 @@ class ModelShippingDpdLivehandler extends Model {
         $data['pickup_country'] = $country_code;
         $data['parcels'] = '1';
         $data['pallets'] = '0';
-        
+
         $data['weight'] = $weight_total;
         $data['pickup_date'] = date('Y-m-d', strtotime('+1 day'));
-        
+
         $data['pickup_parcels_additional_information'] = 'product return';
 
         $warehouse_info = $this->getWarehouse($warehouse_id);
@@ -1129,7 +1130,7 @@ class ModelShippingDpdLivehandler extends Model {
 
         $result = $this->requestCollection($data);
 
-        return $result;        
+        return $result;
     }
 
     // Update terminal list
@@ -1197,7 +1198,7 @@ class ModelShippingDpdLivehandler extends Model {
 
     private function custom_length($x, $length) {
         if(strlen($x) <= $length) {
-            
+
             return $x;
         } else {
             $y = substr($x, 0, $length);
@@ -1252,16 +1253,16 @@ class ModelShippingDpdLivehandler extends Model {
         }
 
         // if (!$url) {
-            $url = $api_url . 'ws-mapper-rest/' . $params['action'];
+        $url = $api_url . 'ws-mapper-rest/' . $params['action'];
         // }
 
 
         if ($params['action'] != 'crImport_') {
             $url .= '?';
         }
-        
+
         $auth = '';
-        
+
         $params['username'] = $this->config->get("dpd_setting_api_username");
         $params['password'] = $this->config->get("dpd_setting_api_password");
 
@@ -1290,12 +1291,12 @@ class ModelShippingDpdLivehandler extends Model {
 
         $currenttime = time();
 
-        // set_error_handler(
-        //     create_function(
-        //         '$severity, $message, $file, $line',
-        //         'throw new ErrorException($message, $severity, $severity, $file, $line);'
-        //     )
-        // );
+        set_error_handler(
+            function($errno, $errstr, $errfile, $errline)
+            {
+                echo $errstr . " in file " . $errfile . " on line " . $errline . ". Debug backtrace: <pre>" . print_r(debug_backtrace(), true) . "</pre>";
+            }
+        );
 
         try {
             $postRequestResult = file_get_contents($url, false, $context);
@@ -1304,9 +1305,9 @@ class ModelShippingDpdLivehandler extends Model {
         catch (Exception $e) {
             echo $e->getMessage();
         }
-        
+
         restore_error_handler();
-        
+
         if($params['action']=='parcelPrint_' || $params['action'] == 'parcelManifestPrint_' || $params['action'] == 'crImport_'){
             return $postRequestResult;
         }

@@ -1,4 +1,4 @@
-var dpd_gmap_api_key = window.wow_gmap_api_key;
+﻿var dpd_gmap_api_key = window.wow_gmap_api_key;
 var dpd_gmap_base_url = 'https://maps.googleapis.com/maps/api/geocode/json';
 
 var dpd_parcel_modal;
@@ -74,10 +74,9 @@ var dpd_parcel_map = {};
 
 		var code = $(this).data('terminal-code');
 		var terminal_title = $(this).data('terminal-title');
+		var vId = $(this).data('terminal-shipping-id');
 
-				
-		// Temporart detach AJAX interceptor
-		useAjaxInterceptor(false);
+		
 
 		$.ajax({
 	      url: 'index.php?route=checkout/checkout/dpd_set_terminal',
@@ -94,12 +93,17 @@ var dpd_parcel_map = {};
 	        console.error('DPD Parcel store: ' + error);
 	      },
 	      complete: function() {
-	      	$('#dpd-selected-parcel').html(terminal_title);
+			if(vId){
+				$("#shipping_method_form").find('input:radio').prop('checked',false);	
+				$("#shipping_method_form").find('input:radio').each(function() {
+					if($.trim($( this ).attr( 'id' )) == 'dpd_parcel.dpd_parcel_'+vId){
+						$( this ).click();
+					}
+				});
+			}
+	      	$('.dpd-selected-parcel').html(terminal_title);
 	      	$('#dpd-close-parcel-modal').trigger('click');
-	      	// Need delay to reattach AJAX interceptor
-	      	setTimeout(function() {
-	      		useAjaxInterceptor(true);
-	      	}, 1000);
+	      	
 	      }
 	    });
 	}
@@ -122,6 +126,7 @@ var dpd_parcel_map = {};
 		var phone = dpd_parcel_map.marker_info.find('.info-phone');
 		var email = dpd_parcel_map.marker_info.find('.info-email');
 		var btn = dpd_parcel_map.marker_info.find('.select-terminal');
+
 
 		title.html(terminal.company);
 		address.html(terminal.street + ', ' + terminal.pcode + ', ' + terminal.city  || '-');
@@ -188,6 +193,7 @@ var dpd_parcel_map = {};
 
 		btn.data('terminal-code', terminal.code);
 		btn.data('terminal-title', terminal.company + ', ' + terminal.street);
+		btn.data('terminal-shipping-id', $('#dptid').val());
 
 		dpd_parcel_map.marker_info.show();
 
@@ -322,12 +328,13 @@ var dpd_parcel_map = {};
 	function bindModal() {
 
 		// Open the modal on button click
-		$('#dpd-show-parcel-modal').off('click').click(function(event) {
+		$('.dpd-show-parcel-modal').off('click').click(function(event) {
 			event.preventDefault();
 		    initMap();
 
 		    dpd_parcel_modal.css('display', 'block');
 		    $('body').css('overflow', 'hidden');
+			$('#dptid').val($(this).attr('data-tId'));
 
 		    $(this).parent().find('input[name="shipping_method"]').prop('checked', true)
 		})
@@ -343,6 +350,7 @@ var dpd_parcel_map = {};
 		dpd_parcel_modal.off('click').click(function(event) {
 		    if (event.target == dpd_parcel_modal.get(0)) {
 		        dpd_parcel_modal.css('display', 'none');
+				$('body').css('overflow', 'auto');
 		    }
 		})
 
