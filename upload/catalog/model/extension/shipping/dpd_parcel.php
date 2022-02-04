@@ -437,7 +437,7 @@ class ModelExtensionShippingDpdParcel extends Model {
         ksort($parcel_terminals);
 
         // Format dropdown
-        $parcel_select = '<select name="dpd_parcel" class="select-parcel full-width">';
+        $parcel_select = '<select onchange="$(\'#dpd_parcel\\\.dpd_parcel_5\').trigger(\'click\');" name="dpd_parcel" class="select-parcel full-width">';
 
         $parcel_select .= '<option value="0">'. $this->language->get('text_select') .'</option>';
         
