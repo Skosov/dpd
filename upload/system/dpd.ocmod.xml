@@ -1562,4 +1562,175 @@
         </operation>
 
     </file>
+<<<<<<< HEAD
+=======
+    $shipping = explode('.', $code);
+    <!-- checkout number validation-->
+    <file path="catalog/view/theme/default/template/checkout/register.twig">
+        <operation>
+            <search index="3"><![CDATA[</script>]]></search>
+            <add position="after"><![CDATA[{#DPD IC mod start#}
+            <script>
+    let inp = document.querySelector('#input-payment-telephone');
+
+    // Проверяем фокус
+    inp.addEventListener('focus', _ => {
+        // Если там ничего нет или есть, но левое
+        if(!/^\+\d*$/.test(inp.value))
+            // То вставляем знак плюса как значение
+            inp.value = '+';
+    });
+
+    inp.addEventListener('keypress', e => {
+        // Отменяем ввод не цифр
+        if(!/\d/.test(e.key))
+            e.preventDefault();
+    });
+    document.getElementById('input-payment-telephone').addEventListener('input', function(){
+        this.value = "+" + this.value.slice(1);
+    });
+
+</script>
+<style>
+    input:focus{outline: none;}
+</style>
+{#DPD IC mod end#}]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/default/template/checkout/guest.twig">
+        <operation>
+            <search index="3"><![CDATA[</script>]]></search>
+            <add position="after"><![CDATA[{#DPD IC mod start#}
+            <script>
+    let inp = document.querySelector('#input-payment-telephone');
+
+    // Проверяем фокус
+    inp.addEventListener('focus', _ => {
+        // Если там ничего нет или есть, но левое
+        if(!/^\+\d*$/.test(inp.value))
+            // То вставляем знак плюса как значение
+            inp.value = '+';
+    });
+
+    inp.addEventListener('keypress', e => {
+        // Отменяем ввод не цифр
+        if(!/\d/.test(e.key))
+            e.preventDefault();
+    });
+    document.getElementById('input-payment-telephone').addEventListener('input', function(){
+        this.value = "+" + this.value.slice(1);
+    });
+
+</script>
+<style>
+    input:focus{outline: none;}
+</style>
+{#DPD IC mod end#}]]></add>
+        </operation>
+    </file>
+    <!-- J3 checkout number validation-->
+    <file path="catalog/view/theme/journal3/template/checkout/register.twig">
+        <operation>
+            <search index="3"><![CDATA[</script>]]></search>
+            <add position="after"><![CDATA[{#DPD IC mod start#}
+            <script>
+    let inp = document.querySelector('#input-payment-telephone');
+
+    // Проверяем фокус
+    inp.addEventListener('focus', _ => {
+        // Если там ничего нет или есть, но левое
+        if(!/^\+\d*$/.test(inp.value))
+            // То вставляем знак плюса как значение
+            inp.value = '+';
+    });
+
+    inp.addEventListener('keypress', e => {
+        // Отменяем ввод не цифр
+        if(!/\d/.test(e.key))
+            e.preventDefault();
+    });
+    document.getElementById('input-payment-telephone').addEventListener('input', function(){
+        this.value = "+" + this.value.slice(1);
+    });
+
+</script>
+<style>
+    input:focus{outline: none;}
+</style>
+{#DPD IC mod end#}]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/journal3/template/checkout/guest.twig">
+        <operation>
+            <search index="3"><![CDATA[</script>]]></search>
+            <add position="after"><![CDATA[{#DPD IC mod start#}
+            <script>
+    let inp = document.querySelector('#input-payment-telephone');
+
+    // Проверяем фокус
+    inp.addEventListener('focus', _ => {
+        // Если там ничего нет или есть, но левое
+        if(!/^\+\d*$/.test(inp.value))
+            // То вставляем знак плюса как значение
+            inp.value = '+';
+    });
+
+    inp.addEventListener('keypress', e => {
+        // Отменяем ввод не цифр
+        if(!/\d/.test(e.key))
+            e.preventDefault();
+    });
+    document.getElementById('input-payment-telephone').addEventListener('input', function(){
+        this.value = "+" + this.value.slice(1);
+    });
+
+</script>
+<style>
+    input:focus{outline: none;}
+</style>
+{#DPD IC mod end#}]]></add>
+        </operation>
+    </file>
+
+    <!-- Postcode required -->
+    <file path="catalog/controller/checkout/guest.php">
+        <operation>
+            <search><![CDATA[if ($country_info && $country_info['postcode_required'] && (utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {]]></search>
+            <add position="replace" offset="2"><![CDATA[/*DPD IC mod start*/
+            if ((utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {
+				$json['error']['postcode'] = $this->language->get('error_postcode');
+			}
+            /*DPD IC mod end*/]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/checkout/register.php">
+        <operation>
+            <search><![CDATA[if ($country_info && $country_info['postcode_required'] && (utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {]]></search>
+            <add position="replace" offset="2"><![CDATA[/*DPD IC mod start*/
+            if ((utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {
+				$json['error']['postcode'] = $this->language->get('error_postcode');
+			}/*DPD IC mod end*/]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/checkout/payment_address.php">
+        <operation>
+            <search><![CDATA[if ($country_info && $country_info['postcode_required'] && (utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {]]></search>
+            <add position="replace" offset="2"><![CDATA[/*DPD IC mod start*/
+            if ((utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {
+				$json['error']['postcode'] = $this->language->get('error_postcode');
+			}
+			/*DPD IC mod end*/]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/checkout/shipping_address.php">
+        <operation>
+            <search><![CDATA[if ($country_info && $country_info['postcode_required'] && (utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {]]></search>
+            <add position="replace" offset="2"><![CDATA[/*DPD IC mod start*/
+            if ((utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {
+				$json['error']['postcode'] = $this->language->get('error_postcode');
+			}
+            /*DPD IC mod end*/]]></add>
+        </operation>
+    </file>
+>>>>>>> dev_ivan
 </modification>
