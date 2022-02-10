@@ -688,7 +688,7 @@ class ModelShippingDpdLivehandler extends Model {
 
         $responseResult = @json_decode($result, true);
 
-        if ($responseResult['status'] == 'err') {
+        if (!is_null($responseResult) && $responseResult['status'] == 'err') {
             return $responseResult;
         } else {
             return $this->getLabelsOutput($result);
